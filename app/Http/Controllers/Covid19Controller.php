@@ -29,14 +29,16 @@ class Covid19Controller extends Controller
         $result = $this->searchByCountry($covidGlobalJson, $countCovidGlobal, $country);
         $finalResult = [];
         $substringDate = substr($covidGlobalJson[$result]['attributes']['Last_Update'], 0, 10);
-        $convertToDate = date('d M Y H:i:s', $substringDate);
+        // $convertToDate = date('D, M Y H:i:s', $substringDate);
+        $convertToDate = $this->dateIndo(date('Y-m-d', $substringDate));
+        $resultTimes = $convertToDate.' '.date('H:i:s', $substringDate);
 
         if ($result == -1) {
             $finalResult[] = [];
         } else {
             $finalResult[] = [
                 'country_name' => $covidGlobalJson[$result]['attributes']['Country_Region'],
-                'last_update' => $convertToDate,
+                'last_update' => $resultTimes,
                 'latitude' => $covidGlobalJson[$result]['attributes']['Lat'],
                 'longitude' => $covidGlobalJson[$result]['attributes']['Long_'],
                 'confirmed' => $covidGlobalJson[$result]['attributes']['Confirmed'],
@@ -53,6 +55,37 @@ class Covid19Controller extends Controller
             'dataList' => $finalResult,
             'country' => $country
 		]);
+    }   
+
+    private function dateIndo($date)
+    {
+        $day = date('D', strtotime($date));
+        $dayList = array(
+			'Sun' => 'Minggu',
+			'Mon' => 'Senin',
+			'Tue' => 'Selasa',
+			'Wed' => 'Rabu',
+			'Thu' => 'Kamis',
+			'Fri' => 'Jumat',
+			'Sat' => 'Sabtu'
+		);
+        // Key akan otomatis increment
+        $months = array(
+            1 => 'Januari',
+            'Februari',
+            'Maret',
+            'April', 
+            'Mei',
+            'Juni',
+            'Juli',
+            'Agustus',
+            'September',
+            'Oktober', 
+            'November',
+            'Desember'
+        );
+        $split = explode('-', $date);
+        return $dayList[$day].', '.$split[2].' '.$months[(int)$split[1]].' '.$split[0];
     }
 
     private function searchByCountry(array $data, $countData, $search = '')
