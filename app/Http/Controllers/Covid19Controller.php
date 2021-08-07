@@ -9,7 +9,7 @@ class Covid19Controller extends Controller
 {
     public function index(Request $request)
     {
-        // Get api nya
+        // Get api nya, tidak perlu pake cURL lagi sudah ada HTTP/Guzzle
         $covidGlobal = Http::get('https://api.kawalcorona.com/');
         $covidGlobalJson = $covidGlobal->json();
 		$countryList = [];
@@ -28,13 +28,15 @@ class Covid19Controller extends Controller
 
         $result = $this->searchByCountry($covidGlobalJson, $countCovidGlobal, $country);
         $finalResult = [];
+        $substringDate = substr($covidGlobalJson[$result]['attributes']['Last_Update'], 0, 10);
+        $convertToDate = date('d M Y H:i:s', $substringDate);
 
         if ($result == -1) {
             $finalResult[] = [];
         } else {
             $finalResult[] = [
                 'country_name' => $covidGlobalJson[$result]['attributes']['Country_Region'],
-                'last_update' => $covidGlobalJson[$result]['attributes']['Last_Update'],
+                'last_update' => $convertToDate,
                 'latitude' => $covidGlobalJson[$result]['attributes']['Lat'],
                 'longitude' => $covidGlobalJson[$result]['attributes']['Long_'],
                 'confirmed' => $covidGlobalJson[$result]['attributes']['Confirmed'],
